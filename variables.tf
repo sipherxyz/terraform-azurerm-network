@@ -28,6 +28,12 @@ variable "dns_servers" {
   description = "The DNS servers to be used with vNet."
 }
 
+variable "location" {
+  type        = string
+  default     = null
+  description = "The location/region where the virtual network is created. If provided, this will override resource_group_location. For backward compatibility."
+}
+
 variable "resource_group_location" {
   type        = string
   default     = null
@@ -95,8 +101,124 @@ variable "tracing_tags_prefix" {
   nullable    = false
 }
 
+variable "name" {
+  type        = string
+  default     = null
+  description = "Name of the vnet to create. If provided, this will override vnet_name. For backward compatibility."
+}
+
 variable "vnet_name" {
   type        = string
   default     = "acctvnet"
   description = "Name of the vnet to create."
+}
+
+# NAT Gateway Configuration
+variable "enable_nat_gateway" {
+  type        = bool
+  default     = false
+  description = "Should a NAT Gateway be created for outbound internet access?"
+  nullable    = false
+}
+
+variable "nat_gateway_subnet_names" {
+  type        = list(string)
+  default     = []
+  description = "List of subnet names where NAT Gateway should be attached. NAT Gateway will be created for each subnet."
+}
+
+variable "nat_gateway_idle_timeout_in_minutes" {
+  type        = number
+  default     = 4
+  description = "The idle timeout in minutes for the NAT Gateway. Defaults to 4."
+}
+
+variable "nat_gateway_name" {
+  type        = string
+  default     = null
+  description = "Name of the NAT Gateway. If not provided, will be generated as '{vnet_name}-nat-{subnet_name}'."
+}
+
+# VPN Gateway Configuration
+variable "enable_vpn_gateway" {
+  type        = bool
+  default     = false
+  description = "Should a VPN Gateway be created?"
+  nullable    = false
+}
+
+variable "gateway_subnet_cidr" {
+  type        = string
+  default     = null
+  description = "CIDR block for the gateway subnet. Required if enable_vpn_gateway is true."
+}
+
+variable "vpn_gateway_sku" {
+  type        = string
+  default     = "VpnGw1"
+  description = "The SKU of the VPN Gateway. Valid values are: VpnGw1, VpnGw2, VpnGw3, VpnGw1AZ, VpnGw2AZ, VpnGw3AZ."
+}
+
+variable "vpn_gateway_enable_bgp" {
+  type        = bool
+  default     = false
+  description = "Should BGP be enabled on the VPN Gateway?"
+  nullable    = false
+}
+
+variable "vpn_gateway_name" {
+  type        = string
+  default     = null
+  description = "Name of the VPN Gateway. If not provided, will be generated as '{vnet_name}-vpn-gateway'."
+}
+
+variable "vpn_shared_key" {
+  type        = string
+  default     = null
+  sensitive   = true
+  description = "The shared key for the VPN connection. Required if enable_vpn_gateway is true."
+}
+
+variable "remote_gateway_ip" {
+  type        = string
+  default     = null
+  description = "The public IP address of the remote gateway. Required if enable_vpn_gateway is true."
+}
+
+variable "remote_address_spaces" {
+  type        = list(string)
+  default     = []
+  description = "The address spaces of the remote network. Required if enable_vpn_gateway is true."
+}
+
+variable "remote_gateway_name" {
+  type        = string
+  default     = null
+  description = "Name of the Local Network Gateway (remote gateway). If not provided, will be generated as '{vnet_name}-remote-gateway'."
+}
+
+variable "vpn_connection_name" {
+  type        = string
+  default     = null
+  description = "Name of the VPN connection. If not provided, will be generated as '{vnet_name}-vpn-connection'."
+}
+
+# Network Security Group Configuration
+variable "enable_internal_nsg" {
+  type        = bool
+  default     = false
+  description = "Should an internal Network Security Group be created and associated with subnets?"
+  nullable    = false
+}
+
+variable "internal_nsg_name" {
+  type        = string
+  default     = "internal"
+  description = "Name of the internal Network Security Group."
+}
+
+variable "internal_nsg_source_address_prefix" {
+  type        = list(string)
+  default     = []
+  description = "List of source address prefixes allowed in the NSG rules. If empty, will default to the vNet address space."
 }

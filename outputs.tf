@@ -22,3 +22,49 @@ output "vnet_subnets" {
   description = "The ids of subnets created inside the newly created vNet"
   value       = local.azurerm_subnets[*].id
 }
+
+output "gateway_subnet_id" {
+  description = "The id of the gateway subnet (if VPN Gateway is enabled)"
+  value       = var.enable_vpn_gateway && var.gateway_subnet_cidr != null ? azurerm_subnet.gateway[0].id : null
+}
+
+output "nat_gateway_ids" {
+  description = "Map of NAT Gateway IDs, keyed by subnet name"
+  value = var.enable_nat_gateway ? {
+    for subnet_name in var.nat_gateway_subnet_names :
+    subnet_name => azurerm_nat_gateway.main[subnet_name].id
+  } : {}
+}
+
+output "nat_gateway_public_ip_addresses" {
+  description = "Map of NAT Gateway Public IP addresses, keyed by subnet name"
+  value = var.enable_nat_gateway ? {
+    for subnet_name in var.nat_gateway_subnet_names :
+    subnet_name => azurerm_public_ip.nat[subnet_name].ip_address
+  } : {}
+}
+
+output "vpn_gateway_id" {
+  description = "The id of the VPN Gateway (if enabled)"
+  value       = var.enable_vpn_gateway ? azurerm_virtual_network_gateway.main[0].id : null
+}
+
+output "vpn_gateway_public_ip_address" {
+  description = "The public IP address of the VPN Gateway (if enabled)"
+  value       = var.enable_vpn_gateway ? azurerm_public_ip.vpn_gateway[0].ip_address : null
+}
+
+output "local_network_gateway_id" {
+  description = "The id of the Local Network Gateway (if VPN Gateway is enabled)"
+  value       = var.enable_vpn_gateway && var.remote_gateway_ip != null ? azurerm_local_network_gateway.main[0].id : null
+}
+
+output "vpn_connection_id" {
+  description = "The id of the VPN Connection (if enabled)"
+  value       = var.enable_vpn_gateway && var.remote_gateway_ip != null && var.vpn_shared_key != null ? azurerm_virtual_network_gateway_connection.main[0].id : null
+}
+
+output "network_security_group_id" {
+  description = "The id of the internal Network Security Group (if enabled)"
+  value       = var.enable_internal_nsg ? azurerm_network_security_group.internal[0].id : null
+}
