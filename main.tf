@@ -150,6 +150,13 @@ resource "azurerm_subnet_nat_gateway_association" "main" {
 
   subnet_id      = local.subnet_map[each.value].id
   nat_gateway_id = azurerm_nat_gateway.main[each.value].id
+
+  depends_on = [
+    azurerm_subnet.subnet_for_each,
+    azurerm_subnet.subnet_count,
+    azurerm_nat_gateway.main,
+    azurerm_nat_gateway_public_ip_association.main
+  ]
 }
 
 # VPN Gateway Public IP
