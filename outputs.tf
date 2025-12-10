@@ -23,6 +23,15 @@ output "vnet_subnets" {
   value       = local.azurerm_subnets[*].id
 }
 
+output "subnet_ids" {
+  description = "Map of subnet IDs, keyed by subnet name. Use this to get individual subnet IDs without needing a data source."
+  value = var.use_for_each ? {
+    for k, v in azurerm_subnet.subnet_for_each : k => v.id
+  } : {
+    for i, name in var.subnet_names : name => azurerm_subnet.subnet_count[i].id
+  }
+}
+
 output "gateway_subnet_id" {
   description = "The id of the gateway subnet (if VPN Gateway is enabled)"
   value       = var.enable_vpn_gateway && var.gateway_subnet_cidr != null ? azurerm_subnet.gateway[0].id : null
