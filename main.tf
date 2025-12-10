@@ -115,7 +115,8 @@ resource "azurerm_public_ip" "nat" {
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
   sku                 = "Standard"
-  zones               = ["1", "2", "3"]
+  # Azure NAT Gateway only supports a single zone, so use first zone if provided
+  zones               = length(var.nat_gateway_zones) > 0 ? [var.nat_gateway_zones[0]] : null
   tags                = var.tags
 }
 
@@ -128,7 +129,8 @@ resource "azurerm_nat_gateway" "main" {
   resource_group_name     = var.resource_group_name
   idle_timeout_in_minutes = var.nat_gateway_idle_timeout_in_minutes
   sku_name                = "Standard"
-  zones                   = ["1", "2", "3"]
+  # Azure NAT Gateway only supports a single zone, so use first zone if provided
+  zones                   = length(var.nat_gateway_zones) > 0 ? [var.nat_gateway_zones[0]] : null
   tags                    = var.tags
 }
 

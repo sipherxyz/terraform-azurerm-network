@@ -139,6 +139,12 @@ variable "nat_gateway_name" {
   description = "Name of the NAT Gateway. If not provided, will be generated as '{vnet_name}-nat-{subnet_name}'."
 }
 
+variable "nat_gateway_zones" {
+  type        = list(string)
+  default     = []
+  description = "A list of Availability Zones for the NAT Gateway. Azure NAT Gateway only supports a single zone. If multiple zones are provided, only the first one will be used. If empty (default), NAT Gateway will be created without zone specification. Example: [\"1\"] for zone 1."
+}
+
 # VPN Gateway Configuration
 variable "enable_vpn_gateway" {
   type        = bool
