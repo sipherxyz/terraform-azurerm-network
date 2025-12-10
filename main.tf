@@ -106,11 +106,11 @@ resource "azurerm_subnet" "gateway" {
   address_prefixes     = [var.gateway_subnet_cidr]
 }
 
-# NAT Gateway Public IPs
+# NAT Gateway Public IP (single instance)
 resource "azurerm_public_ip" "nat" {
-  for_each = var.enable_nat_gateway ? toset(var.nat_gateway_subnet_names) : []
+  count = var.enable_nat_gateway ? 1 : 0
 
-  name                = "${local.resolved_vnet_name}-nat-${each.value}-pip"
+  name                = var.nat_gateway_name != null ? "${var.nat_gateway_name}-pip" : "${local.resolved_vnet_name}-nat-pip"
   location            = local.resolved_location
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
@@ -120,11 +120,11 @@ resource "azurerm_public_ip" "nat" {
   tags                = var.tags
 }
 
-# NAT Gateways
+# NAT Gateway (single instance shared by all subnets)
 resource "azurerm_nat_gateway" "main" {
-  for_each = var.enable_nat_gateway ? toset(var.nat_gateway_subnet_names) : []
+  count = var.enable_nat_gateway ? 1 : 0
 
-  name                    = local.nat_gateway_names[each.value]
+  name                    = var.nat_gateway_name != null ? var.nat_gateway_name : "${local.resolved_vnet_name}-nat"
   location                = local.resolved_location
   resource_group_name     = var.resource_group_name
   idle_timeout_in_minutes = var.nat_gateway_idle_timeout_in_minutes
@@ -134,15 +134,15 @@ resource "azurerm_nat_gateway" "main" {
   tags                    = var.tags
 }
 
-# Associate NAT Gateway Public IPs
+# Associate NAT Gateway Public IP
 resource "azurerm_nat_gateway_public_ip_association" "main" {
-  for_each = var.enable_nat_gateway ? toset(var.nat_gateway_subnet_names) : []
+  count = var.enable_nat_gateway ? 1 : 0
 
-  nat_gateway_id       = azurerm_nat_gateway.main[each.value].id
-  public_ip_address_id = azurerm_public_ip.nat[each.value].id
+  nat_gateway_id       = azurerm_nat_gateway.main[0].id
+  public_ip_address_id = azurerm_public_ip.nat[0].id
 }
 
-# Associate NAT Gateways to Subnets
+# Associate NAT Gateway to Subnets (single NAT Gateway for all subnets)
 resource "azurerm_subnet_nat_gateway_association" "main" {
   for_each = var.enable_nat_gateway ? {
     for subnet_name in var.nat_gateway_subnet_names :
@@ -150,8 +150,8 @@ resource "azurerm_subnet_nat_gateway_association" "main" {
     if contains(var.subnet_names, subnet_name)
   } : {}
 
-  subnet_id      = local.subnet_map[each.value].id
-  nat_gateway_id = azurerm_nat_gateway.main[each.value].id
+  subnet_id      = var.use_for_each ? azurerm_subnet.subnet_for_each[each.value].id : azurerm_subnet.subnet_count[index(var.subnet_names, each.value)].id
+  nat_gateway_id = azurerm_nat_gateway.main[0].id
 
   depends_on = [
     azurerm_subnet.subnet_for_each,
@@ -282,8 +282,8 @@ resource "azurerm_network_security_rule" "allow_internal_outbound" {
 
 # Associate NSG to all subnets
 resource "azurerm_subnet_network_security_group_association" "main" {
-  for_each = var.enable_internal_nsg ? local.subnet_map : {}
+  for_each = var.enable_internal_nsg ? toset(var.subnet_names) : toset([])
 
-  subnet_id                 = each.value.id
+  subnet_id                 = var.use_for_each ? azurerm_subnet.subnet_for_each[each.value].id : azurerm_subnet.subnet_count[index(var.subnet_names, each.value)].id
   network_security_group_id = azurerm_network_security_group.internal[0].id
 }

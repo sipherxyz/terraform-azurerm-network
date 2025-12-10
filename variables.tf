@@ -124,7 +124,7 @@ variable "enable_nat_gateway" {
 variable "nat_gateway_subnet_names" {
   type        = list(string)
   default     = []
-  description = "List of subnet names where NAT Gateway should be attached. NAT Gateway will be created for each subnet."
+  description = "List of subnet names where the single NAT Gateway should be attached. A single NAT Gateway will be created and associated with all specified subnets."
 }
 
 variable "nat_gateway_idle_timeout_in_minutes" {
@@ -136,7 +136,7 @@ variable "nat_gateway_idle_timeout_in_minutes" {
 variable "nat_gateway_name" {
   type        = string
   default     = null
-  description = "Name of the NAT Gateway. If not provided, will be generated as '{vnet_name}-nat-{subnet_name}'."
+  description = "Name of the NAT Gateway. If not provided, will be generated as '{vnet_name}-nat'. A single NAT Gateway is created and shared by all subnets."
 }
 
 variable "nat_gateway_zones" {

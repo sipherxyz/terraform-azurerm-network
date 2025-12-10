@@ -28,20 +28,14 @@ output "gateway_subnet_id" {
   value       = var.enable_vpn_gateway && var.gateway_subnet_cidr != null ? azurerm_subnet.gateway[0].id : null
 }
 
-output "nat_gateway_ids" {
-  description = "Map of NAT Gateway IDs, keyed by subnet name"
-  value = var.enable_nat_gateway ? {
-    for subnet_name in var.nat_gateway_subnet_names :
-    subnet_name => azurerm_nat_gateway.main[subnet_name].id
-  } : {}
+output "nat_gateway_id" {
+  description = "ID of the NAT Gateway (single instance shared by all subnets)"
+  value       = var.enable_nat_gateway ? azurerm_nat_gateway.main[0].id : null
 }
 
-output "nat_gateway_public_ip_addresses" {
-  description = "Map of NAT Gateway Public IP addresses, keyed by subnet name"
-  value = var.enable_nat_gateway ? {
-    for subnet_name in var.nat_gateway_subnet_names :
-    subnet_name => azurerm_public_ip.nat[subnet_name].ip_address
-  } : {}
+output "nat_gateway_public_ip_address" {
+  description = "Public IP address of the NAT Gateway"
+  value       = var.enable_nat_gateway ? azurerm_public_ip.nat[0].ip_address : null
 }
 
 output "vpn_gateway_id" {
