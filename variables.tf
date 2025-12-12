@@ -213,7 +213,7 @@ variable "vpn_connection_name" {
 variable "enable_internal_nsg" {
   type        = bool
   default     = false
-  description = "Should an internal Network Security Group be created and associated with subnets?"
+  description = "Should an internal Network Security Group be created?"
   nullable    = false
 }
 
@@ -221,6 +221,12 @@ variable "internal_nsg_name" {
   type        = string
   default     = "internal"
   description = "Name of the internal Network Security Group."
+}
+
+variable "attach_nsg_to_subnets" {
+  type        = list(string)
+  default     = []
+  description = "List of subnet names to attach the NSG to. If empty and enable_internal_nsg is true, NSG will be attached to all subnets (backward compatibility). If specified, only the listed subnets will have NSG attached."
 }
 
 variable "internal_nsg_source_address_prefix" {

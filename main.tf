@@ -280,9 +280,15 @@ resource "azurerm_network_security_rule" "allow_internal_outbound" {
   network_security_group_name = azurerm_network_security_group.internal[0].name
 }
 
-# Associate NSG to all subnets
+# Associate NSG to specified subnets
 resource "azurerm_subnet_network_security_group_association" "main" {
-  for_each = var.enable_internal_nsg ? toset(var.subnet_names) : toset([])
+  for_each = var.enable_internal_nsg ? {
+    for subnet_name in (
+      length(var.attach_nsg_to_subnets) > 0 ? var.attach_nsg_to_subnets : var.subnet_names
+    ) :
+    subnet_name => subnet_name
+    if contains(var.subnet_names, subnet_name)
+  } : {}
 
   subnet_id                 = var.use_for_each ? azurerm_subnet.subnet_for_each[each.value].id : azurerm_subnet.subnet_count[index(var.subnet_names, each.value)].id
   network_security_group_id = azurerm_network_security_group.internal[0].id
