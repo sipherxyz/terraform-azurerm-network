@@ -110,7 +110,7 @@ resource "azurerm_subnet" "gateway" {
 resource "azurerm_public_ip" "nat" {
   count = var.enable_nat_gateway ? 1 : 0
 
-  name                = var.nat_gateway_name != null ? "${var.nat_gateway_name}-pip" : "${local.resolved_vnet_name}-nat-pip"
+  name                = var.nat_gateway_name != null ? "${var.nat_gateway_name}-pip" : "${local.resolved_vnet_name}-nat-gateway-pip"
   location            = local.resolved_location
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
@@ -124,7 +124,7 @@ resource "azurerm_public_ip" "nat" {
 resource "azurerm_nat_gateway" "main" {
   count = var.enable_nat_gateway ? 1 : 0
 
-  name                    = var.nat_gateway_name != null ? var.nat_gateway_name : "${local.resolved_vnet_name}-nat"
+  name                    = var.nat_gateway_name != null ? var.nat_gateway_name : "${local.resolved_vnet_name}-nat-gateway"
   location                = local.resolved_location
   resource_group_name     = var.resource_group_name
   idle_timeout_in_minutes = var.nat_gateway_idle_timeout_in_minutes
@@ -234,7 +234,7 @@ resource "azurerm_virtual_network_gateway_connection" "main" {
 resource "azurerm_network_security_group" "internal" {
   count = var.enable_internal_nsg ? 1 : 0
 
-  name                = var.internal_nsg_name
+  name                = var.internal_nsg_use_vnet_prefix ? "${local.resolved_vnet_name}-${var.internal_nsg_name}" : var.internal_nsg_name
   location            = local.resolved_location
   resource_group_name = var.resource_group_name
   tags                = var.tags

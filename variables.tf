@@ -223,6 +223,13 @@ variable "internal_nsg_name" {
   description = "Name of the internal Network Security Group."
 }
 
+variable "internal_nsg_use_vnet_prefix" {
+  type        = bool
+  default     = true
+  description = "Whether to prefix the internal NSG name with the VNet name. When true, NSG name will be '{vnet_name}-{internal_nsg_name}'. When false, uses only 'internal_nsg_name' (backward compatible with existing deployments)."
+  nullable    = false
+}
+
 variable "attach_nsg_to_subnets" {
   type        = list(string)
   default     = []
