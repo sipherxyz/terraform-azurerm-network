@@ -159,6 +159,12 @@ variable "gateway_subnet_cidr" {
   description = "CIDR block for the gateway subnet. Required if enable_vpn_gateway is true."
 }
 
+variable "gateway_subnet_private_endpoint_network_policies" {
+  type        = bool
+  default     = true
+  description = "Enable private endpoint network policies on the gateway subnet. Default is true (Enabled)."
+}
+
 variable "vpn_gateway_sku" {
   type        = string
   default     = "VpnGw1"
@@ -240,4 +246,31 @@ variable "internal_nsg_source_address_prefix" {
   type        = list(string)
   default     = []
   description = "List of source address prefixes allowed in the NSG rules. If empty, will default to the vNet address space."
+}
+
+# Backward compatibility - component tags
+variable "enable_component_tags" {
+  type        = bool
+  default     = false
+  description = "Whether to add component-specific tags (Component, Type) to resources. Enable for backward compatibility with existing deployments."
+}
+
+# VPN Gateway ip_configuration name
+variable "vpn_gateway_ip_config_name" {
+  type        = string
+  default     = "vnetGatewayConfig"
+  description = "Name for the VPN Gateway ip_configuration. Use 'vpnGatewayIpConfig' for backward compatibility with existing deployments."
+}
+
+# NSG management options
+variable "manage_nsg_subnet_associations" {
+  type        = bool
+  default     = true
+  description = "Whether the module should manage NSG-to-subnet associations. Set to false if associations are managed externally or already exist."
+}
+
+variable "manage_nsg_rules" {
+  type        = bool
+  default     = true
+  description = "Whether the module should manage NSG rules. Set to false if rules are managed externally or already exist."
 }
